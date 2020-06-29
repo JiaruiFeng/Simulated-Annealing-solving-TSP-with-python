@@ -19,7 +19,7 @@ for i in range(len(citys)):
     citys['x'][i]=float(coordinate[0])
     citys['y'][i]=float(coordinate[1])
 
-print citys.head(5)
+print (citys.head(5))
 
 start=list(citys.iloc[0])
 end=list(citys.iloc[0])
@@ -51,9 +51,10 @@ Pr=0.5 #initiate accept possibility
 T0=dif/Pr#initiate terperature
 T=T0
 Tmin=T/50
-k=10*len(paths) #times of internal circulation 
-length=0#initiate distance according to the initiate path
-length=utils.CalLength(citys,paths,start,end)
+k=10*len(paths) #times of internal circulation
+initialPath=list(np.random.permutation(paths))
+length=utils.CalLength(citys,initialPath,start,end)
+print (length)
 
 t=0 #time  
 '''
@@ -83,12 +84,13 @@ while T>Tmin:
 print length
 
 '''
-paths=list(np.random.permutation(paths))
-length=utils.CalLength(citys,paths,start,end)
-print length
+
+
+optimalPath = initialPath.copy()
+optimalLength=length
 while T>Tmin:
     for i in range(k):
-        newPaths=paths
+        newPaths=optimalPath.copy()
         for j in range(int(T0/500)):
             a=0
             b=0
@@ -99,27 +101,30 @@ while T>Tmin:
             newPaths[a]=newPaths[b]
             newPaths[b]=te
         newLength=utils.CalLength(citys,newPaths,start,end)
-        if newLength<length:
-            length=newLength
+        if newLength<optimalLength:
+            optimalLength=newLength
+            optimalPath=newPaths
+            print(optimalPath[:5])
         else:
              #metropolis principle
-             p=math.exp(-(newLength-length)/T)
+             p=math.exp(-(newLength-optimalLength)/T)
              r=np.random.uniform(low=0,high=1)
              if r<p:
-                 length=newLength
+                 optimalLength=newLength
+                 optimalPath=newPaths
 
     back=np.random.uniform(low=0,high=1)
     if back>=0.85:
         T=T*2
         continue
     t+=1
-    print t
+    print (t)
     T=T0/(1+t)
-print length
+print (optimalLength)
 
 
 
 
-citys['order']=paths
+citys['order']=initialPath
 citys_order=citys.sort_values(by=['order'])
 plt.plot(citys_order['x'],citys_order['y'])         
