@@ -52,17 +52,19 @@ T0=dif/Pr#initiate terperature
 T=T0
 Tmin=T/50
 k=10*len(paths) #times of internal circulation
-initialPath=list(np.random.permutation(paths))
+initialPath=paths.copy()
 length=utils.CalLength(citys,initialPath,start,end)
 print (length)
 
 t=0 #time  
 '''
+optimalPath=initialPath.copy()
+optimalLength=length
 while T>Tmin:
     for i in range(k):
         a=0
         b=0
-        newPaths=paths
+        newPaths=optimalPath.copy()
         while a==b:
             a=np.random.randint(0,len(paths))
             b=np.random.randint(0,len(paths))
@@ -71,23 +73,26 @@ while T>Tmin:
         newPaths[b]=te
         newLength=utils.CalLength(citys,newPaths,start,end)
         if newLength<length:
-            length=newLength
+            optimalLength=newLength
+            optimalPath=newPaths
         else:
              #metropolis principle
              p=math.exp(-(newLength-length)/T)
              r=np.random.uniform(low=0,high=1)
              if r<p:
-                 length=newLength
+                optimalLength=newLength
+                optimalPath=newPaths
     t+=1
     print t
     T=T0/(1+t)
-print length
+print optimalLength
 
 '''
-
-
+initialPath=list(np.random.permutation(paths))
+length=utils.CalLength(citys,initialPath,start,end)
 optimalPath = initialPath.copy()
 optimalLength=length
+t=0
 while T>Tmin:
     for i in range(k):
         newPaths=optimalPath.copy()
